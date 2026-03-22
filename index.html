@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Fleet Damage Chart Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .filter-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
+        .chart-card img { transition: transform 0.3s ease; }
+        .chart-card:hover img { transform: scale(1.02); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
+        .img-fallback { background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #94a3b8; height: 250px; border-radius: 0.5rem; }
+        .status-badge { font-size: 0.9375rem; padding: 0.5rem 1.2rem; font-weight: 800; border-radius: 9999px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-transform: uppercase; }
+        .bg-alert { background-color: #ef4444; color: white; }
+        .bg-caution { background-color: #fde047; color: #854d0e; }
+        .bg-normal { background-color: #22c55e; color: white; }
+    </style>
+    <script>
+        // 處理 OneDrive 圖片讀取失敗的情況
+        function imgError(image) {
+            image.onerror = null;
+            const container = image.parentElement;
+            container.innerHTML = `
+                <div class="img-fallback">
+                    <i class="fas fa-cloud-slash text-3xl mb-2"></i>
+                    <p class="text-xs font-bold">圖片讀取失敗</p>
+                    <p class="text-[10px] mt-1 opacity-60">請檢查 OneDrive 權限或公司防火牆</p>
+                </div>
+            `;
+        }
+
+        function filterCharts(type) {
+            const cards = document.querySelectorAll('.chart-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + type).classList.add('active');
+            cards.forEach(card => {
+                card.style.display = (type === 'all' || card.getAttribute('data-type') === type) ? 'block' : 'none';
+            });
+        }
+
+        function openModal(src, title) {
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = src;
+            document.getElementById('modalTitle').innerText = title + ' 損壞圖表詳情';
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                <h1 class="text-xl font-black border-l-2 border-slate-200 pl-3 tracking-tight text-slate-800 uppercase">LM Fleet Damage Report</h1>
+            </div>
+            <div class="text-[10px] text-blue-600 bg-blue-50 px-3 py-1 rounded-full font-black tracking-widest uppercase">
+                Cloud Version 2026
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 過濾按鈕 -->
+        <div class="flex flex-wrap gap-3 mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+            <button onclick="filterCharts('all')" id="btn-all" class="filter-btn active px-6 py-2 rounded-lg text-sm font-bold border border-transparent shadow-sm transition-all">All Cars</button>
+            <button onclick="filterCharts('private')" id="btn-private" class="filter-btn px-6 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-all">Private Car</button>
+            <button onclick="filterCharts('pickup')" id="btn-pickup" class="filter-btn px-6 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-all">Pick Up Truck</button>
+        </div>
+
+        <div id="chart-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- HKE-00022 -->
+            <div class="chart-card bg-white rounded-xl shadow-md overflow-hidden border border-slate-100 flex flex-col" data-type="private">
+                <div class="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <span class="font-bold text-lg text-slate-700">HKE-00022</span>
+                    <span class="status-badge bg-caution">Caution</span>
+                </div>
+                <div class="cursor-pointer p-3 flex-grow bg-white flex items-center justify-center" onclick="openModal('https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK', 'HKE-00022')">
+                    <img src="https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK" alt="HKE-00022" onerror="imgError(this)" class="w-full h-auto object-contain max-h-[250px] rounded-md">
+                </div>
+                <div class="p-4 text-[11px] text-slate-400 border-t border-slate-50 flex justify-between font-bold">
+                    <span><i class="far fa-clock mr-1"></i> 2026/03/23</span>
+                    <span class="text-blue-500 underline cursor-pointer">View History</span>
+                </div>
+            </div>
+
+            <!-- HKE-00024 -->
+            <div class="chart-card bg-white rounded-xl shadow-md overflow-hidden border border-slate-100 flex flex-col" data-type="private">
+                <div class="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <span class="font-bold text-lg text-slate-700">HKE-00024</span>
+                    <span class="status-badge bg-normal">Normal</span>
+                </div>
+                <div class="cursor-pointer p-3 flex-grow bg-white flex items-center justify-center" onclick="openModal('https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK', 'HKE-00024')">
+                    <img src="https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK" alt="HKE-00024" onerror="imgError(this)" class="w-full h-auto object-contain max-h-[250px] rounded-md">
+                </div>
+                <div class="p-4 text-[11px] text-slate-500 border-t border-slate-50 font-bold">
+                    <i class="fas fa-car mr-1 text-slate-300"></i> WT1489
+                </div>
+            </div>
+
+            <!-- HKE-00025 -->
+            <div class="chart-card bg-white rounded-xl shadow-md overflow-hidden border border-slate-100 flex flex-col" data-type="private">
+                <div class="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <span class="font-bold text-lg text-slate-700">HKE-00025</span>
+                    <span class="status-badge bg-normal">Normal</span>
+                </div>
+                <div class="cursor-pointer p-3 flex-grow bg-white flex items-center justify-center" onclick="openModal('https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK', 'HKE-00025')">
+                    <img src="https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK" alt="HKE-00025" onerror="imgError(this)" class="w-full h-auto object-contain max-h-[250px] rounded-md">
+                </div>
+                <div class="p-4 text-[11px] text-slate-400 border-t border-slate-50 text-center font-bold">
+                    Inspection Confirmed
+                </div>
+            </div>
+
+            <!-- HKE-00026 -->
+            <div class="chart-card bg-white rounded-xl shadow-md overflow-hidden border border-slate-100 flex flex-col" data-type="private">
+                <div class="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <span class="font-bold text-lg text-slate-700">HKE-00026</span>
+                    <span class="status-badge bg-normal">Normal</span>
+                </div>
+                <div class="cursor-pointer p-3 flex-grow bg-white flex items-center justify-center" onclick="openModal('https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK', 'HKE-00026')">
+                    <img src="https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK" alt="HKE-00026" onerror="imgError(this)" class="w-full h-auto object-contain max-h-[250px] rounded-md">
+                </div>
+                <div class="p-4 text-[11px] text-slate-400 border-t border-slate-50 text-center font-bold">
+                    Sync Completed
+                </div>
+            </div>
+
+            <!-- HKE-00027 -->
+            <div class="chart-card bg-white rounded-xl shadow-md overflow-hidden border border-red-100 flex flex-col" data-type="pickup">
+                <div class="p-4 border-b border-red-50 flex justify-between items-center bg-red-50/30">
+                    <span class="font-bold text-lg text-slate-700">HKE-00027</span>
+                    <span class="status-badge bg-alert">Alert</span>
+                </div>
+                <div class="cursor-pointer p-3 flex-grow bg-white flex items-center justify-center" onclick="openModal('https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK', 'HKE-00027')">
+                    <img src="https://1drv.ms/i/c/0762bbc5c5c787a6/IQAOs_5xMCrHQ6b3IqZscf2LAcWDWdeZTRXwWdwHkqkDMGo?e=yTAVIK" alt="HKE-00027" onerror="imgError(this)" class="w-full h-auto object-contain max-h-[250px] rounded-md">
+                </div>
+                <div class="p-4 text-[11px] text-red-600 border-t border-red-50 font-black text-center uppercase italic">
+                    <i class="fas fa-tools mr-1"></i> Missing Device / Urgent Repair
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 圖片放大視窗 (Modal) -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <div class="max-w-5xl w-full p-4 flex flex-col items-center" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center w-full mb-4 px-4">
+                <h2 id="modalTitle" class="text-white text-lg font-bold tracking-widest bg-black/40 px-6 py-2 rounded-full border border-white/20"></h2>
+                <button onclick="closeModal()" class="text-white text-4xl hover:text-red-400 transition">&times;</button>
+            </div>
+            <div class="bg-white p-2 rounded-xl shadow-2xl overflow-hidden">
+                <img id="modalImage" src="" alt="放大圖表" class="mx-auto max-h-[80vh] w-auto">
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-20 py-10 bg-slate-900 text-slate-500 text-center text-[10px] tracking-[0.3em] uppercase">
+        <p>Internal Use Only &copy; 2026 LM Fleet Management</p>
+    </footer>
+
+</body>
+</html>
